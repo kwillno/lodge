@@ -35,7 +35,7 @@ def ls():
     s = ""
 
     for ts in timeslots:
-        s += f"<p>{ts.toHR()}</p>"
+        s += f"<p>{ts.toHR(clickDisable = True)}</p>"
 
     return s
 
@@ -123,6 +123,17 @@ def api_add():
     except KeyError as e:
         return {"error": 1, "msg": f"Invalid timeslot format on key {e}"}
 
+
+@app.route("/api/edit/<id>", methods=["PUT", "POST"])
+@app.route("/api/edit/<id>/", methods=["PUT", "POST"])
+def api_edit(id):
+    """
+    API endpoint for editing an already existing timeslot.
+    id  - id of the timeslot to change
+    """
+    ts = timeslot.from_json(request.json)
+    response = jkt.editTimeslot(queryId = id, ts = ts).toDict()
+    return response
 
 @app.route("/api/ls")
 @app.route("/api/ls/")
