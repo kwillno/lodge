@@ -10,6 +10,7 @@ def index():
     return "<p>This is lodge index</p>"
 
 @app.route("/status")
+@app.route("/status/")
 def status():
     try:
         response = jkt.status()
@@ -19,6 +20,7 @@ def status():
 
 
 @app.route("/stop")
+@app.route("/stop/")
 def stop():
     try:
         response = jkt.stop()
@@ -27,6 +29,7 @@ def stop():
         return "No running timers"
 
 @app.route("/ls")
+@app.route("/ls/")
 def ls():
     timeslots = jkt.getTimeslots()
 
@@ -40,6 +43,7 @@ def ls():
     return s
 
 @app.route("/report")
+@app.route("/report/")
 def report():
     rpt = jkt.report()
 
@@ -60,18 +64,23 @@ def api_index():
 
     return response
 
+@app.route('/api/start/<project>')
+@app.route('/api/start/<project>/')
 @app.route('/api/start/<project>/<tags>')
 @app.route('/api/start/<project>/<tags>/')
-def api_start(project, tags):
+def api_start(project = None, tags = None):
     """
     API for starting timeslot
     project - The project name for the timeslot
     tags    - tags seperated by "&"
     """
 
-    tags=tags.split("&")
+    if not project:
+        return {"error": 1, "msg":"Project must be given in start"}
 
-    if tags == ['']:
+    if tags:
+        tags=tags.split("&")
+    else:
         tags = ['<no tags>']
 
     try:
@@ -99,6 +108,7 @@ def api_status():
 
 
 @app.route("/api/stop")
+@app.route("/api/stop/")
 def api_stop():
     try:
         response = jkt.stop().toDict()
@@ -168,7 +178,11 @@ def api_report(project = None, tags = None):
 
     if project:
         rpt = jkt.report()
-        project_report = rpt.getTagReport(project=project)
+        project_report = rpt.getProjectReport(project=project)[0]
+
+        tag_report = rpt.getTagReport(project=project)
+
+        project_report["tags"] = tag_report
 
         return project_report
 
